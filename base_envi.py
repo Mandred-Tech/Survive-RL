@@ -1,4 +1,4 @@
-""" 1 for Herbivore"""
+""" 1 for Herbivore 2 for Carnivore 3 for Plants 4 for Rocks"""
 """ 1 for up direction -1 for down direction -2 for left and 2 for right"""
 import pygame
 from config import colors, fonts
