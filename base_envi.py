@@ -2,6 +2,7 @@
 """ 1 for up direction -1 for down direction -2 for left and 2 for right"""
 import pygame
 from config import colors, fonts
+import random
 
 
 class Environment:
@@ -26,8 +27,18 @@ class Environment:
                 background_tile_map[row][column] = pygame.Rect(rect)
         return background_tile_map, tile_map
 
-    def hud(self):
-        pass
+    def environment_setter(self, number_of_herbivores, time_herbivore, memory_herbivore, storage_herbivore,
+                           number_of_carnivores, time_carnivore, memory_carnivore, storage_carnivore):
+        total_randoms = number_of_carnivores + number_of_herbivores + self.number_of_plants + self.number_of_rocks
+        random_rows = [random.randint(0, self.number_of_rows - 1) for _ in range(0, total_randoms)]
+        random_columns = random.sample(range(0, self.number_of_columns), total_randoms)
+        herbivore_list = []
+        carnivore_list = []
+        plant_list = []
+        rock_list = []
+        for i in range(0, number_of_herbivores):
+            herbivore_list.append(Herbivore("red", time_herbivore, memory_herbivore, storage_herbivore, random_rows[i],
+                                            random_columns[i]))
 
 
 class Herbivore:
@@ -100,6 +111,7 @@ class Herbivore:
 
 
 if __name__ == '__main__':
+    number_herbivores = int(input("Enter the number of Herbivores"))
     pygame.init()
     WINDOW_WIDTH = 1500
     WINDOW_HEIGHT = 700
@@ -111,14 +123,12 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
 
     title_txt, title_txt_rect = fonts('font3', 40, "Survive RL", (100, 25), colors('light_green'))
-    # pygame.draw.line(display_surface, colors('white'), (0, 45), (2000, 45), 2)
-    # pygame.draw.line(display_surface, colors('white'), (0, 655), (2000, 655), 2)
     company_txt, company_txt_rect = fonts('font3', 40, "Mandred Tech", (1375, 680), colors('light_red'))
-    # pygame.draw.rect(display_surface,colors('light_blue'),(0,50,1500,600),5)
 
-    env = Environment(10, 20, 25, 1500, 600)
+    env = Environment(10, 5, 25, 1500, 600)
     back_tile_map, tile_map = env.background_tile_map_layer(50, 650, 0, 1500)
-    herbivore_1 = Herbivore('red', 100, 50, 20, 10, 20)
+    herbivore_1 = Herbivore('red', 100, 50, 20, 15, 10)
+    env.environment_setter(number_herbivores,1,1,1,1,1,1,1)
 
     running = True
     while running:
