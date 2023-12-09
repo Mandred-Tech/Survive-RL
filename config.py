@@ -31,9 +31,9 @@ def colors(color): # Function to define colors used in the environment
             return grey
 
 def fonts(font_name,size,text,location,color):  # Function to define fonts
-    font1=pygame.font.Font(r'/Fonts/aware-font/AwareBold-qZo3x.ttf', size)
-    font2=pygame.font.Font(r'/Fonts/fonarto-2-font/FonartoRegular-8Mon2.ttf', size)
-    font3=pygame.font.Font(r'/Fonts/stepalange-font/Stepalange-x3BLm.otf', size)
+    font1=pygame.font.Font(r'D:\My_programing_projects\Survive_RL\Fonts\aware-font\AwareBold-qZo3x.ttf', size)
+    font2=pygame.font.Font(r'D:\My_programing_projects\Survive_RL\Fonts\fonarto-2-font\FonartoRegular-8Mon2.ttf', size)
+    font3=pygame.font.Font(r'D:\My_programing_projects\Survive_RL\Fonts\stepalange-font\Stepalange-x3BLm.otf', size)
 
     match font_name:
         case 'font1':
