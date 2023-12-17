@@ -41,7 +41,7 @@ class Environment:
                 herbivore_list.append(Herbivore("red", time_herbivore, memory_herbivore, storage_herbivore, random_rows[i],
                                             random_columns[i]))
             else:
-                carnivore_list.append(Carnivore("green", time_carnivore, memory_carnivore, storage_carnivore,
+                carnivore_list.append(Carnivore("blue", time_carnivore, memory_carnivore, storage_carnivore,
                                             random_rows[i],
                                             random_columns[i]))
         return herbivore_list, carnivore_list
@@ -125,7 +125,7 @@ class Carnivore:
         self.column_number = column_number
         self.memory = [0] * self.memory_capacity
         self.storage = [0] * self.storage_capacity
-        pygame.draw.rect(display_surface, colors('green'), back_tile_map[row_number][column_number])
+        pygame.draw.rect(display_surface, colors('blue'), back_tile_map[row_number][column_number])
         tile_map[row_number][column_number] = 2
 
 
