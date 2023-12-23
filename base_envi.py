@@ -1,14 +1,17 @@
 """ 1 for Herbivore 2 for Carnivore 3 for Plants 4 for Rocks"""
 """ 1 for up direction 2 for down direction 3 for left and 4 for right"""
+"""simulation_controller variable is 0 is user want to use his own NN or function, 1 for random actions
+2 for inbuilt RL method"""
 import pygame
 from config import colors, fonts
 import random
 from itertools import product
+import numpy as np
 
 
 class Environment:
     def __init__(self, number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-                 health_herbivore=100, health_carnivore=100):
+                 health_herbivore, health_carnivore):
         self.number_of_herbivores = number_of_herbivores
         self.number_of_carnivores = number_of_carnivores
         self.health_herbivore = health_herbivore
@@ -22,7 +25,7 @@ class Environment:
         self.number_of_columns = self.window_width // self.size_of_tile
         print(self.number_of_rows, self.number_of_columns)
 
-    def background_tile_map_layer(self, start_row, end_row, start_column, end_column):
+    def background_tile_map_layer(self, display_surface):
         background_tile_map = [[0] * self.number_of_columns for i in range(0, self.number_of_rows)]
         agent_tile_map = [[0] * self.number_of_columns for i in range(0, self.number_of_rows)]
         obstacle_tile_map = [[0] * self.number_of_columns for i in range(0, self.number_of_rows)]
@@ -49,6 +52,27 @@ class Environment:
             plant_list.append(Plant(i, plant_color, 10, required_sample[i][0], required_sample[i][1]))
 
         return herbivore_list, carnivore_list, plant_list, rock_list
+
+    def step(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return True
+        display_surface.blit(title_txt, title_txt_rect)
+        display_surface.blit(company_txt, company_txt_rect)
+        self.random_move(herbivore_list)
+        updater()
+        pygame.display.update()
+        clock.tick(FPS)
+        # print(np.count_nonzero(np.array(agent_tile_map) == 1), len(herbivore_list))
+        return False
+
+    def stop(self):
+        pygame.quit()
+        return True
+
+    def random_move(self, agent_list):
+        for i in agent_list:
+            i.move(random.randint(1, 4))
 
 
 class Herbivore:
@@ -81,10 +105,13 @@ class Herbivore:
 
         if agent_tile_map[self.row_number][self.column_number] == 1:
             agent_tile_map[prev_row][prev_col] = 1
+            swapped_herbivore=object_finder(herbivore_list,self.row_number,self.column_number)
+            swapped_herbivore.row_number=prev_row
+            swapped_herbivore.column_number=prev_col
+
         else:
             agent_tile_map[prev_row][prev_col] = 0
             agent_tile_map[self.row_number][self.column_number] = 1
-        updater()
         # print(agent_tile_map[self.row_number][self.column_number],agent_tile_map[prev_row][prev_col])
         # print(obstacle_tile_map[self.row_number][self.column_number],obstacle_tile_map[prev_row][prev_col])
 
@@ -124,65 +151,82 @@ def updater():  # this function can be called whenever entire environment has to
             pygame.draw.rect(display_surface, colors('light_blue'),
                              back_tile_map[row][column], 2)
             if agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 0:
-                Herbivore(-1, herbivore_color, 0, row, column)  # fake object just to draw graphic
+                pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
             elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 3:
-                Herbivore(-1, herbivore_color, 0, row, column)  # fake object just to draw graphic
+                pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
                 plant_obj = object_finder(plant_list, row, column)
                 object_finder(herbivore_list, row, column).health += plant_obj.reward_value
                 plant_list.remove(plant_obj)
                 obstacle_tile_map[row][column] = 0
 
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 3:
-                Plant(-1, plant_color, 0, row, column)  # fake object just to draw graphic
+                pygame.draw.rect(display_surface, colors(plant_color), back_tile_map[row][column], 5)
 
 
-def object_finder(object_list, row, column):  # Helps to find the object agent or obstracle using index from the list
+def object_finder(object_list, row, column):  # Helps to find the object agent or obstacle using index from the list
     for i in object_list:
         if i.row_number == row and i.column_number == column:
             return i
 
 
-if __name__ == '__main__':
+def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
+               health_herbivore, health_carnivore):
     pygame.init()
+    global WINDOW_WIDTH
+    global WINDOW_HEIGHT
     WINDOW_WIDTH = 1500
     WINDOW_HEIGHT = 700
+    global display_surface
     display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     display_surface.fill(colors('grey'))
     pygame.display.set_caption("SURVIVE RL")
+    global herbivore_color
+    global plant_color
     herbivore_color = 'blue'
     plant_color = 'green'
-
+    global FPS
+    global clock
     FPS = 60
     clock = pygame.time.Clock()
 
+    global title_txt
+    global title_txt_rect
+    global company_txt
+    global company_txt_rect
     title_txt, title_txt_rect = fonts('font3', 40, "Survive RL", (100, 25), colors('light_green'))
     company_txt, company_txt_rect = fonts('font3', 40, "Mandred Tech", (1375, 680), colors('light_red'))
+    envi = Environment(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
+                       health_herbivore, health_carnivore)
+    global back_tile_map
+    global agent_tile_map
+    global obstacle_tile_map
+    global herbivore_list
+    global carnivore_list
+    global rock_list
+    global plant_list
+    back_tile_map, agent_tile_map, obstacle_tile_map = envi.background_tile_map_layer(display_surface)
+    herbivore_list, carnivore_list, plant_list, rock_list = envi.environment_setter()
+    return envi
 
-    env = Environment(5, 5, 10, 10)
-    back_tile_map, agent_tile_map, obstacle_tile_map = env.background_tile_map_layer(50, 650, 0, 1500)
-    herbivore_1 = Herbivore(20, 'red', 100, 15, 10)
-    herbivore_list, carnivore_list, plant_list, rock_list = env.environment_setter()
-    herbivore_list.append(herbivore_1)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    herbivore_1.move(1)
-                if event.key == pygame.K_DOWN:
-                    herbivore_1.move(2)
-                if event.key == pygame.K_LEFT:
-                    herbivore_1.move(3)
-                if event.key == pygame.K_RIGHT:
-                    herbivore_1.move(4)
-
-        display_surface.blit(title_txt, title_txt_rect)
-        display_surface.blit(company_txt, company_txt_rect)
-
-        pygame.display.update()
-        clock.tick(FPS)
-
-    pygame.quit()
+if __name__ == '__main__':
+    pass
+    # pygame.init()
+    # WINDOW_WIDTH = 1500
+    # WINDOW_HEIGHT = 700
+    # display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    # display_surface.fill(colors('grey'))
+    # pygame.display.set_caption("SURVIVE RL")
+    # herbivore_color = 'blue'
+    # plant_color = 'green'
+    #
+    # FPS = 15
+    # clock = pygame.time.Clock()
+    #
+    # title_txt, title_txt_rect = fonts('font3', 40, "Survive RL", (100, 25), colors('light_green'))
+    # company_txt, company_txt_rect = fonts('font3', 40, "Mandred Tech", (1375, 680), colors('light_red'))
+    # envi = Simulation(10, 10, 15, 15, 100, 100)
+    # done = False
+    # while not done:
+    #     done = envi.step()
+    # envi.stop()
