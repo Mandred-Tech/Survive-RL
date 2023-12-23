@@ -20,7 +20,7 @@ class Environment:
         self.window_height = 600
         self.number_of_rows = self.window_height // self.size_of_tile
         self.number_of_columns = self.window_width // self.size_of_tile
-        print(self.number_of_rows,self.number_of_columns)
+        print(self.number_of_rows, self.number_of_columns)
 
     def background_tile_map_layer(self, start_row, end_row, start_column, end_column):
         background_tile_map = [[0] * self.number_of_columns for i in range(0, self.number_of_rows)]
@@ -37,16 +37,18 @@ class Environment:
 
     def environment_setter(self):
         total_randoms = self.number_of_carnivores + self.number_of_herbivores + self.number_of_plants + self.number_of_rocks
-        sample_combinations=list(product(list(range(0,self.number_of_rows)),list(range(0,self.number_of_columns))))
-        required_sample=random.sample(sample_combinations,total_randoms)
+        sample_combinations = list(product(list(range(0, self.number_of_rows)), list(range(0, self.number_of_columns))))
+        required_sample = random.sample(sample_combinations, total_randoms)
         herbivore_list = []
         carnivore_list = []
         plant_list = []
         rock_list = []
-        for i in range(0,self.number_of_herbivores):
-            herbivore_list.append(Herbivore(i,herbivore_color,100,required_sample[i][0],required_sample[i][1]))
-        for i in range(self.number_of_herbivores,self.number_of_herbivores+self.number_of_plants):
-            plant_list.append(Plant(i,plant_color,10,required_sample[i][0],required_sample[i][1]))
+        for i in range(0, self.number_of_herbivores):
+            herbivore_list.append(Herbivore(i, herbivore_color, 100, required_sample[i][0], required_sample[i][1]))
+        for i in range(self.number_of_herbivores, self.number_of_herbivores + self.number_of_plants):
+            plant_list.append(Plant(i, plant_color, 10, required_sample[i][0], required_sample[i][1]))
+
+        return herbivore_list, carnivore_list, plant_list, rock_list
 
 
 class Herbivore:
@@ -115,19 +117,29 @@ def column_checker(column_number):
     return column_number
 
 
-def updater():
+def updater():  # this function can be called whenever entire environment has to be changed based on changes in tile-map
     for row in range(0, len(back_tile_map)):
         for column in range(0, len(back_tile_map[0])):
             pygame.draw.rect(display_surface, colors('grey'), back_tile_map[row][column])
             pygame.draw.rect(display_surface, colors('light_blue'),
                              back_tile_map[row][column], 2)
             if agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 0:
-                pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
+                Herbivore(-1, herbivore_color, 0, row, column)  # fake object just to draw graphic
             elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 3:
-                pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
-                pygame.draw.rect(display_surface, colors(plant_color), back_tile_map[row][column], 5)
+                Herbivore(-1, herbivore_color, 0, row, column)  # fake object just to draw graphic
+                plant_obj = object_finder(plant_list, row, column)
+                object_finder(herbivore_list, row, column).health += plant_obj.reward_value
+                plant_list.remove(plant_obj)
+                obstacle_tile_map[row][column] = 0
+
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 3:
-                pygame.draw.rect(display_surface, colors(plant_color), back_tile_map[row][column], 5)
+                Plant(-1, plant_color, 0, row, column)  # fake object just to draw graphic
+
+
+def object_finder(object_list, row, column):  # Helps to find the object agent or obstracle using index from the list
+    for i in object_list:
+        if i.row_number == row and i.column_number == column:
+            return i
 
 
 if __name__ == '__main__':
@@ -137,7 +149,7 @@ if __name__ == '__main__':
     display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     display_surface.fill(colors('grey'))
     pygame.display.set_caption("SURVIVE RL")
-    herbivore_color = 'red'
+    herbivore_color = 'blue'
     plant_color = 'green'
 
     FPS = 60
@@ -148,8 +160,9 @@ if __name__ == '__main__':
 
     env = Environment(5, 5, 10, 10)
     back_tile_map, agent_tile_map, obstacle_tile_map = env.background_tile_map_layer(50, 650, 0, 1500)
-    herbivore_1 = Herbivore(20,'red', 100, 15, 10)
-    env.environment_setter()
+    herbivore_1 = Herbivore(20, 'red', 100, 15, 10)
+    herbivore_list, carnivore_list, plant_list, rock_list = env.environment_setter()
+    herbivore_list.append(herbivore_1)
 
     running = True
     while running:
