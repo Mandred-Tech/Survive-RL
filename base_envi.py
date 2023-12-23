@@ -6,7 +6,6 @@ import pygame
 from config import colors, fonts
 import random
 from itertools import product
-import numpy as np
 
 
 class Environment:
@@ -59,10 +58,15 @@ class Environment:
                 return True
         display_surface.blit(title_txt, title_txt_rect)
         display_surface.blit(company_txt, company_txt_rect)
-        self.random_move(herbivore_list)
-        updater()
-        pygame.display.update()
-        clock.tick(FPS)
+        match simulation_controller:
+            case 'random':
+                self.random_move(herbivore_list)
+            case 'inbuilt':
+                pass  # do RL logic
+            case 'custom':
+                return herbivore_list, carnivore_list, plant_list, rock_list
+        # pygame.display.update()
+        # clock.tick(FPS)
         # print(np.count_nonzero(np.array(agent_tile_map) == 1), len(herbivore_list))
         return False
 
@@ -73,6 +77,24 @@ class Environment:
     def random_move(self, agent_list):
         for i in agent_list:
             i.move(random.randint(1, 4))
+
+    def test_move(self, herbivore_1):  # for manually moving a particular agent
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    print(herbivore_1.move(1))
+                if event.key == pygame.K_DOWN:
+                    print(herbivore_1.move(2))
+                if event.key == pygame.K_LEFT:
+                    print(herbivore_1.move(3))
+                if event.key == pygame.K_RIGHT:
+                    print(herbivore_1.move(4))
+        display_surface.blit(title_txt, title_txt_rect)
+        display_surface.blit(company_txt, company_txt_rect)
+        pygame.display.update()
+        clock.tick(FPS)
 
 
 class Herbivore:
@@ -105,15 +127,40 @@ class Herbivore:
 
         if agent_tile_map[self.row_number][self.column_number] == 1:
             agent_tile_map[prev_row][prev_col] = 1
-            swapped_herbivore=object_finder(herbivore_list,self.row_number,self.column_number)
-            swapped_herbivore.row_number=prev_row
-            swapped_herbivore.column_number=prev_col
+            swapped_herbivore = object_finder(herbivore_list, self.row_number, self.column_number)
+            swapped_herbivore.row_number = prev_row
+            swapped_herbivore.column_number = prev_col
 
         else:
             agent_tile_map[prev_row][prev_col] = 0
             agent_tile_map[self.row_number][self.column_number] = 1
+        updater()
+        return self.observation_space()
         # print(agent_tile_map[self.row_number][self.column_number],agent_tile_map[prev_row][prev_col])
         # print(obstacle_tile_map[self.row_number][self.column_number],obstacle_tile_map[prev_row][prev_col])
+
+    def observation_space(self):
+        min_row = min(self.row_number - observation_space,
+                      self.row_number + observation_space)
+        max_row = max(self.row_number - observation_space,
+                      self.row_number + observation_space)
+        min_column = min(self.column_number - observation_space,
+                         self.column_number + observation_space)
+        max_column = max(self.column_number - observation_space,
+                         self.column_number + observation_space)
+        observation_rows = list(range(min_row, max_row + 1))
+        observation_columns = list(range(min_column, max_column + 1))
+        required_space = list(product(observation_rows, observation_columns))
+        required_space.remove((self.row_number, self.column_number))
+        # print(self.row_number, self.column_number)
+        # print(required_space)
+        temp_space_list = []
+        for i in required_space:
+            row = row_checker(i[0])
+            column = column_checker(i[1])
+            temp_space_list.append(agent_tile_map[row][column] + obstacle_tile_map[row][column])
+        # print(temp_space_list)
+        return temp_space_list
 
 
 class Plant:
@@ -161,6 +208,8 @@ def updater():  # this function can be called whenever entire environment has to
 
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 3:
                 pygame.draw.rect(display_surface, colors(plant_color), back_tile_map[row][column], 5)
+    pygame.display.update()
+    clock.tick(FPS)
 
 
 def object_finder(object_list, row, column):  # Helps to find the object agent or obstacle using index from the list
@@ -170,7 +219,7 @@ def object_finder(object_list, row, column):  # Helps to find the object agent o
 
 
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-               health_herbivore, health_carnivore):
+               health_herbivore, health_carnivore, sim_controller='random', obs_space=1):
     pygame.init()
     global WINDOW_WIDTH
     global WINDOW_HEIGHT
@@ -206,27 +255,8 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     global plant_list
     back_tile_map, agent_tile_map, obstacle_tile_map = envi.background_tile_map_layer(display_surface)
     herbivore_list, carnivore_list, plant_list, rock_list = envi.environment_setter()
+    global simulation_controller
+    simulation_controller = sim_controller
+    global observation_space
+    observation_space = obs_space
     return envi
-
-
-if __name__ == '__main__':
-    pass
-    # pygame.init()
-    # WINDOW_WIDTH = 1500
-    # WINDOW_HEIGHT = 700
-    # display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    # display_surface.fill(colors('grey'))
-    # pygame.display.set_caption("SURVIVE RL")
-    # herbivore_color = 'blue'
-    # plant_color = 'green'
-    #
-    # FPS = 15
-    # clock = pygame.time.Clock()
-    #
-    # title_txt, title_txt_rect = fonts('font3', 40, "Survive RL", (100, 25), colors('light_green'))
-    # company_txt, company_txt_rect = fonts('font3', 40, "Mandred Tech", (1375, 680), colors('light_red'))
-    # envi = Simulation(10, 10, 15, 15, 100, 100)
-    # done = False
-    # while not done:
-    #     done = envi.step()
-    # envi.stop()
