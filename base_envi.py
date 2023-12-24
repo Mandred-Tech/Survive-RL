@@ -1,7 +1,7 @@
 """ 1 for Herbivore 2 for Carnivore 3 for Plants 4 for Rocks"""
 """ 1 for up direction 2 for down direction 3 for left and 4 for right"""
-"""simulation_controller variable is 0 is user want to use his own NN or function, 1 for random actions
-2 for inbuilt RL method"""
+"""simulation_controller variable is "custom" if user wants to use his own NN or function, "random" for random 
+actions """
 import pygame
 from config import colors, fonts
 import random
@@ -41,34 +41,37 @@ class Environment:
         total_randoms = self.number_of_carnivores + self.number_of_herbivores + self.number_of_plants + self.number_of_rocks
         sample_combinations = list(product(list(range(0, self.number_of_rows)), list(range(0, self.number_of_columns))))
         required_sample = random.sample(sample_combinations, total_randoms)
+        print(required_sample)
         herbivore_list = []
         carnivore_list = []
         plant_list = []
         rock_list = []
         for i in range(0, self.number_of_herbivores):
-            herbivore_list.append(Herbivore(i, herbivore_color, 100, required_sample[i][0], required_sample[i][1]))
+            herbivore_list.append(
+                Herbivore(i, herbivore_color, self.health_herbivore, required_sample[i][0], required_sample[i][1]))
         for i in range(self.number_of_herbivores, self.number_of_herbivores + self.number_of_plants):
-            plant_list.append(Plant(i, plant_color, 10, required_sample[i][0], required_sample[i][1]))
+            plant_list.append(Plant(i, plant_color, plant_value, required_sample[i][0], required_sample[i][1]))
+        for i in range(self.number_of_herbivores + self.number_of_plants,
+                       self.number_of_herbivores + self.number_of_plants + self.number_of_rocks):
+            rock_list.append(Rock(i, rock_color, rock_value, required_sample[i][0], required_sample[i][1]))
 
         return herbivore_list, carnivore_list, plant_list, rock_list
 
-    def step(self):
+    def step(self, agent, action):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return True
+                return True, None
         display_surface.blit(title_txt, title_txt_rect)
         display_surface.blit(company_txt, company_txt_rect)
         match simulation_controller:
             case 'random':
                 self.random_move(herbivore_list)
-            case 'inbuilt':
-                pass  # do RL logic
             case 'custom':
-                return herbivore_list, carnivore_list, plant_list, rock_list
-        # pygame.display.update()
-        # clock.tick(FPS)
-        # print(np.count_nonzero(np.array(agent_tile_map) == 1), len(herbivore_list))
-        return False
+                return False, agent.move(action)
+            case _:
+                print("Wrong Simulation controller. Please check!")
+                return True, None
+        return False, None
 
     def stop(self):
         pygame.quit()
@@ -96,6 +99,9 @@ class Environment:
         pygame.display.update()
         clock.tick(FPS)
 
+    def get_lists(self):
+        return herbivore_list, carnivore_list, plant_list, rock_list
+
 
 class Herbivore:
     def __init__(self, identifier, color, health, row_number, column_number):
@@ -111,26 +117,47 @@ class Herbivore:
     def move(self, direction):
         prev_row = self.row_number
         prev_col = self.column_number
+        mover = [0, 0]  # variable to find what was the previous move of the agent
+        # print(self.row_number,self.column_number)
         match direction:
             case 1:
                 self.row_number -= 1
                 self.row_number = row_checker(self.row_number)
+                mover = [-1, 0]
             case 2:
                 self.row_number += 1
                 self.row_number = row_checker(self.row_number)
+                mover = [1, 0]
             case 4:
                 self.column_number += 1
                 self.column_number = column_checker(self.column_number)
+                mover = [0, 1]
             case 3:
                 self.column_number -= 1
                 self.column_number = column_checker(self.column_number)
-
+                mover = [0, -1]
+        print(self.row_number, self.column_number)
         if agent_tile_map[self.row_number][self.column_number] == 1:
             agent_tile_map[prev_row][prev_col] = 1
-            swapped_herbivore = object_finder(herbivore_list, self.row_number, self.column_number)
+            swapped_herbivore = object_finder(self.id, herbivore_list, self.row_number, self.column_number)
+            # print(swapped_herbivore.row_number, swapped_herbivore.column_number)
+            # print(self.row_number,self.column_number)
             swapped_herbivore.row_number = prev_row
             swapped_herbivore.column_number = prev_col
 
+        # Moving rocks in this function instead of updater
+        elif obstacle_tile_map[self.row_number][self.column_number] == 4:
+            rock_obj = object_finder(-1, rock_list, self.row_number, self.column_number)
+            new_rock_row = self.row_number + mover[0]
+            new_rock_row = row_checker(new_rock_row)
+            new_rock_col = self.column_number + mover[1]
+            new_rock_col = column_checker(new_rock_col)
+            obstacle_tile_map[new_rock_row][new_rock_col] = 4
+            obstacle_tile_map[self.row_number][self.column_number] = 0
+            agent_tile_map[self.row_number][self.column_number] = 1
+            agent_tile_map[prev_row][prev_col] = 0
+            rock_obj.row_number = new_rock_row
+            rock_obj.column_number = new_rock_col
         else:
             agent_tile_map[prev_row][prev_col] = 0
             agent_tile_map[self.row_number][self.column_number] = 1
@@ -160,6 +187,7 @@ class Herbivore:
             column = column_checker(i[1])
             temp_space_list.append(agent_tile_map[row][column] + obstacle_tile_map[row][column])
         # print(temp_space_list)
+        temp_space_list.append(self.health)  # adding health to output to send
         return temp_space_list
 
 
@@ -170,9 +198,19 @@ class Plant:
         self.reward_value = value
         self.row_number = row_number
         self.column_number = column_number
-        self.storage = [0]
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number], 5)
         obstacle_tile_map[row_number][column_number] = 3
+
+
+class Rock:
+    def __init__(self, identifier, color, value, row_number, column_number):
+        self.id = identifier
+        self.color = color
+        self.reward_value = value
+        self.row_number = row_number
+        self.column_number = column_number
+        pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number], 8)
+        obstacle_tile_map[row_number][column_number] = 4
 
 
 def row_checker(row_number):
@@ -201,25 +239,35 @@ def updater():  # this function can be called whenever entire environment has to
                 pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
             elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 3:
                 pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
-                plant_obj = object_finder(plant_list, row, column)
-                object_finder(herbivore_list, row, column).health += plant_obj.reward_value
+                plant_obj = object_finder(-1, plant_list, row, column)
+                object_finder(-1, herbivore_list, row, column).health += plant_obj.reward_value
                 plant_list.remove(plant_obj)
                 obstacle_tile_map[row][column] = 0
-
+            elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 4:
+                herbi_obj = object_finder(-1, herbivore_list, row, column)
+                herbivore_list.remove(herbi_obj)
+                agent_tile_map[row][column]=0
+                pygame.draw.rect(display_surface, colors(rock_color), back_tile_map[row][column], 8)
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 3:
                 pygame.draw.rect(display_surface, colors(plant_color), back_tile_map[row][column], 5)
+
+            elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 4:
+                pygame.draw.rect(display_surface, colors(rock_color), back_tile_map[row][column], 8)
+
     pygame.display.update()
     clock.tick(FPS)
 
 
-def object_finder(object_list, row, column):  # Helps to find the object agent or obstacle using index from the list
+def object_finder(idx_avoid, object_list, row,
+                  column):  # Helps to find the object agent or obstacle using index from the list
     for i in object_list:
-        if i.row_number == row and i.column_number == column:
+        if i.row_number == row and i.column_number == column and i.id != idx_avoid:
             return i
 
 
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-               health_herbivore, health_carnivore, sim_controller='random', obs_space=1):
+               health_herbivore, health_carnivore, plant_reward=10, rock_reward=-2, sim_controller='random',
+               obs_space=1):
     pygame.init()
     global WINDOW_WIDTH
     global WINDOW_HEIGHT
@@ -230,12 +278,20 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     display_surface.fill(colors('grey'))
     pygame.display.set_caption("SURVIVE RL")
     global herbivore_color
+    global carnivore_color
     global plant_color
+    global rock_color
     herbivore_color = 'blue'
+    carnivore_color = 'red'
     plant_color = 'green'
+    rock_color = 'black'
+    global plant_value
+    global rock_value
+    plant_value = plant_reward
+    rock_value = rock_reward
     global FPS
     global clock
-    FPS = 60
+    FPS = 5
     clock = pygame.time.Clock()
 
     global title_txt
