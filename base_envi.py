@@ -273,7 +273,7 @@ class Carnivore:
             carnivore_obj = object_finder(self.id, carnivore_list, self.row_number, self.column_number)
             carnivore_obj.health += herbivore_carnivore_reward
             herbivore_list.remove(self)
-            agent_tile_map[self.row_number][self.column_number] = 0
+            agent_tile_map[self.row_number][self.column_number] = 2
             
         # Moving rocks in this function instead of updater
         elif obstacle_tile_map[self.row_number][self.column_number] == 4:
