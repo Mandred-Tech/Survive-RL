@@ -390,35 +390,30 @@ def column_checker(column_number):
 
 
 def updater():  # this function can be called whenever entire environment has to be changed based on changes in tile-map
-    for row in range(0, len(back_tile_map)):
+for row in range(0, len(back_tile_map)):
         for column in range(0, len(back_tile_map[0])):
             pygame.draw.rect(display_surface, colors('grey'), back_tile_map[row][column])
             pygame.draw.rect(display_surface, colors('light_blue'),
-                            back_tile_map[row][column], 2)
-            #Herbivore
+                             back_tile_map[row][column], 2)
             if agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 0:
                 pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
             elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 3:
                 pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
                 plant_obj = object_finder(-1, plant_list, row, column)
-                if plant_obj is not None:
-                    herbivore_obj = object_finder(-1, herbivore_list, row, column)
-                    if herbivore_obj is not None:
-                        herbivore_obj.health += plant_obj.reward_value
-                    plant_list.remove(plant_obj)
-                    obstacle_tile_map[row][column] = 0
+                object_finder(-1, herbivore_list, row, column).health += plant_obj.reward_value
+                plant_list.remove(plant_obj)
+                obstacle_tile_map[row][column] = 0
             elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 4:
                 herbi_obj = object_finder(-1, herbivore_list, row, column)
                 herbivore_list.remove(herbi_obj)
                 print(len(herbivore_list))
                 agent_tile_map[row][column] = 0
                 pygame.draw.rect(display_surface, colors(rock_color), back_tile_map[row][column], 8)
-
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 3:
                 pygame.draw.rect(display_surface, colors(plant_color), back_tile_map[row][column], 5)
+
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 4:
                 pygame.draw.rect(display_surface, colors(rock_color), back_tile_map[row][column], 8)
-
             #Carnivore
             elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][column] == 0:
                 pygame.draw.rect(display_surface, colors(carnivore_color), back_tile_map[row][column])
