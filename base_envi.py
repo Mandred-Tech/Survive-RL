@@ -6,11 +6,12 @@ import pygame
 from config import colors, fonts
 import random
 from itertools import product
+import math
 
 
 class Environment:
     def __init__(self, number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-                health_herbivore, health_carnivore):
+                 health_herbivore, health_carnivore):
         self.number_of_herbivores = number_of_herbivores
         self.number_of_carnivores = number_of_carnivores
         self.health_herbivore = health_herbivore
@@ -33,7 +34,7 @@ class Environment:
             for column in range(0, len(background_tile_map[0])):
                 rect = pygame.draw.rect(display_surface, colors('light_blue'),
                                         (column * self.size_of_tile, (row * self.size_of_tile) + 50,
-                                        self.size_of_tile - 1, self.size_of_tile - 1), 2)
+                                         self.size_of_tile - 1, self.size_of_tile - 1), 2)
                 background_tile_map[row][column] = pygame.Rect(rect)
         return background_tile_map, agent_tile_map, obstacle_tile_map
 
@@ -47,15 +48,17 @@ class Environment:
         plant_list = []
         rock_list = []
         for i in range(0, self.number_of_herbivores):
-            herbivore_list.append(Herbivore(i, herbivore_color, self.health_herbivore, required_sample[i][0], required_sample[i][1]))
+            herbivore_list.append(
+                Herbivore(i, herbivore_color, self.health_herbivore, required_sample[i][0], required_sample[i][1]))
         for i in range(self.number_of_herbivores, self.number_of_herbivores + self.number_of_plants):
             plant_list.append(Plant(i, plant_color, plant_value, required_sample[i][0], required_sample[i][1]))
         for i in range(self.number_of_herbivores + self.number_of_plants,
-                    self.number_of_herbivores + self.number_of_plants + self.number_of_rocks):
+                       self.number_of_herbivores + self.number_of_plants + self.number_of_rocks):
             rock_list.append(Rock(i, rock_color, rock_value, required_sample[i][0], required_sample[i][1]))
         for i in range(self.number_of_rocks + self.number_of_plants + self.number_of_herbivores,
-                    self.number_of_carnivores + self.number_of_plants + self.number_of_rocks + self.number_of_herbivores):
-            carnivore_list.append(Carnivore(i, carnivore_color,self.health_carnivore, required_sample[i][0], required_sample[i][1]))
+                       self.number_of_carnivores + self.number_of_plants + self.number_of_rocks + self.number_of_herbivores):
+            carnivore_list.append(
+                Carnivore(i, carnivore_color, self.health_carnivore, required_sample[i][0], required_sample[i][1]))
 
         return herbivore_list, carnivore_list, plant_list, rock_list
 
@@ -108,7 +111,6 @@ class Environment:
         return herbivore_list, carnivore_list, plant_list, rock_list
 
 
-
 class Herbivore:
     def __init__(self, identifier, color, health, row_number, column_number):
         self.id = identifier
@@ -150,8 +152,10 @@ class Herbivore:
             # print(self.row_number,self.column_number)
             swapped_herbivore.row_number = prev_row
             swapped_herbivore.column_number = prev_col
+            mean_health(self, swapped_herbivore)
 
-        elif agent_tile_map[self.row_number][self.column_number] == 2 and obstacle_tile_map[self.row_number][self.column_number] == 0:
+        elif agent_tile_map[self.row_number][self.column_number] == 2 and obstacle_tile_map[self.row_number][
+            self.column_number] == 0:
             carnivore_obj = object_finder(-1, carnivore_list, self.row_number, self.column_number)
             carnivore_obj.health += herbivore_value
             herbivore_list.remove(self)
@@ -192,7 +196,6 @@ class Herbivore:
         # print(agent_tile_map[self.row_number][self.column_number],agent_tile_map[prev_row][prev_col])
         # print(obstacle_tile_map[self.row_number][self.column_number],obstacle_tile_map[prev_row][prev_col])
 
-
     def observation_space(self):
         min_row = min(self.row_number - observation_space,
                       self.row_number + observation_space)
@@ -216,7 +219,6 @@ class Herbivore:
         # print(temp_space_list)
         temp_space_list.append(self.health)  # adding health to output to send
         return temp_space_list
-
 
     def health_check(self):
         # print(self.health)
@@ -269,8 +271,10 @@ class Carnivore:
             # print(self.row_number,self.column_number)
             swapped_carnivore.row_number = prev_row
             swapped_carnivore.column_number = prev_col
+            mean_health(self, swapped_carnivore)
 
-        elif agent_tile_map[self.row_number][self.column_number] == 1 and obstacle_tile_map[self.row_number][self.column_number] == 0:
+        elif agent_tile_map[self.row_number][self.column_number] == 1 and obstacle_tile_map[self.row_number][
+            self.column_number] == 0:
             herbivore_obj = object_finder(-1, herbivore_list, self.row_number, self.column_number)
             self.health += herbivore_value
             herbivore_list.remove(herbivore_obj)
@@ -314,13 +318,13 @@ class Carnivore:
 
     def observation_space(self):
         min_row = min(self.row_number - observation_space,
-                    self.row_number + observation_space)
+                      self.row_number + observation_space)
         max_row = max(self.row_number - observation_space,
-                    self.row_number + observation_space)
+                      self.row_number + observation_space)
         min_column = min(self.column_number - observation_space,
-                        self.column_number + observation_space)
+                         self.column_number + observation_space)
         max_column = max(self.column_number - observation_space,
-                        self.column_number + observation_space)
+                         self.column_number + observation_space)
         observation_rows = list(range(min_row, max_row + 1))
         observation_columns = list(range(min_column, max_column + 1))
         required_space = list(product(observation_rows, observation_columns))
@@ -368,6 +372,12 @@ class Rock:
         obstacle_tile_map[row_number][column_number] = 4
 
 
+def mean_health(agent1, agent2):
+    mean_health = math.ceil((agent1.health + agent2.health) / 2)
+    agent1.health = mean_health
+    agent2.health = mean_health
+
+
 def row_checker(row_number):
     if row_number < 0:
         row_number = len(agent_tile_map) - 1
@@ -409,17 +419,19 @@ def updater():  # this function can be called whenever entire environment has to
 
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 4:
                 pygame.draw.rect(display_surface, colors(rock_color), back_tile_map[row][column], 8)
-            #Carnivore
-            elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][column] == 0: #Carnivore drawing
+            # Carnivore
+            elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][column] == 0:  # Carnivore drawing
                 pygame.draw.rect(display_surface, colors(carnivore_color), back_tile_map[row][column])
 
-            elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][column] == 3: # Carnivore and plant interaction
+            elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][
+                column] == 3:  # Carnivore and plant interaction
                 pygame.draw.rect(display_surface, colors(carnivore_color), back_tile_map[row][column])
                 plant_obj = object_finder(-1, plant_list, row, column)
                 object_finder(-1, carnivore_list, row, column).health -= plant_obj.reward_value
                 plant_list.remove(plant_obj)
                 obstacle_tile_map[row][column] = 0
-            elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][column] == 4: # Carnivore and rock interaction
+            elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][
+                column] == 4:  # Carnivore and rock interaction
                 carni_obj = object_finder(-1, carnivore_list, row, column)
                 carnivore_list.remove(carni_obj)
                 # print(len(carnivore_list))
@@ -438,8 +450,9 @@ def object_finder(idx_avoid, object_list, row, column):
 
 
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-               health_herbivore, health_carnivore, herbivore_reward =15,plant_reward=10, rock_reward=-2, sim_controller='random',
-               obs_space=1,speed=30):
+               health_herbivore, health_carnivore, herbivore_reward=15, plant_reward=10, rock_reward=-2,
+               sim_controller='random',
+               obs_space=1, speed=30):
     pygame.init()
     global WINDOW_WIDTH
     global WINDOW_HEIGHT
