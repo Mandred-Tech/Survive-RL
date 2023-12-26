@@ -238,7 +238,7 @@ class Carnivore:
         self.column_number = column_number
         self.storage = [0]
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number])
-        agent_tile_map[row_number][column_number] = 1
+        agent_tile_map[row_number][column_number] = 2
 
     def move(self, direction):
         prev_row = self.row_number
@@ -264,7 +264,7 @@ class Carnivore:
                 mover = [0, -1]
         # print(self.row_number, self.column_number)
         if agent_tile_map[self.row_number][self.column_number] == 2:
-            agent_tile_map[prev_row][prev_col] = 1
+            agent_tile_map[prev_row][prev_col] = 2
             swapped_carnivore = object_finder(self.id, carnivore_list, self.row_number, self.column_number)
             # print(swapped_carnivore.row_number, swapped_carnivore.column_number)
             # print(self.row_number,self.column_number)
@@ -425,7 +425,7 @@ def updater():  # this function can be called whenever entire environment has to
             elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][column] == 3:
                 pygame.draw.rect(display_surface, colors(carnivore_color), back_tile_map[row][column])
                 plant_obj = object_finder(-1, plant_list, row, column)
-                object_finder(-1, carnivore_list, row, column).health += plant_obj.reward_value
+                object_finder(-1, carnivore_list, row, column).health -= plant_obj.reward_value
                 plant_list.remove(plant_obj)
                 obstacle_tile_map[row][column] = 0
             elif agent_tile_map[row][column] == 2 and obstacle_tile_map[row][column] == 4:
