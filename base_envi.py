@@ -154,7 +154,6 @@ class Herbivore:
             carnivore_obj = object_finder(-1, carnivore_list, self.row_number, self.column_number)
             carnivore_obj.health += herbivore_carnivore_reward
             herbivore_list.remove(self)
-            agent_tile_map[self.row_number][self.column_number] = 0
             
         # Moving rocks in this function instead of updater
         elif obstacle_tile_map[self.row_number][self.column_number] == 4:
@@ -271,7 +270,7 @@ class Carnivore:
             swapped_carnivore.column_number = prev_col
 
         elif agent_tile_map[self.row_number][self.column_number] == 1 and obstacle_tile_map[self.row_number][self.column_number] == 0:
-            carnivore_obj = object_finder(-1, carnivore_list, self.row_number, self.column_number)
+            carnivore_obj = object_finder(self.id, carnivore_list, self.row_number, self.column_number)
             carnivore_obj.health += herbivore_carnivore_reward
             herbivore_list.remove(self)
             agent_tile_map[self.row_number][self.column_number] = 0
@@ -367,8 +366,6 @@ class Rock:
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number], 8)
         obstacle_tile_map[row_number][column_number] = 4
 
-herbivore_carnivore_reward = 10  # Reward for a carnivore eating a herbivore
-carnivore_herbivore_reward = 10  # Reward for a herbivore being eaten by a carnivore
 rock_cost_health = 2
 
 def row_checker(row_number):
@@ -439,7 +436,7 @@ def object_finder(idx_avoid, object_list, row, column):
     return None 
 
 
-def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
+def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks, herbivore_reward =15
                health_herbivore, health_carnivore, plant_reward=10, rock_reward=-2, sim_controller='random',
                obs_space=1,speed=30):
     pygame.init()
@@ -461,8 +458,10 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     rock_color = 'black'
     global plant_value
     global rock_value
+    global herbivore_value 
     plant_value = plant_reward
     rock_value = rock_reward
+    herbivore_value = herbivore_reward
     global FPS
     global clock
     FPS = speed
