@@ -426,6 +426,7 @@ def updater():  # this function can be called whenever entire environment has to
                 carnivore_list.remove(carni_obj)
                 print(len(carnivore_list))
                 agent_tile_map[row][column] = 0
+                pygame.draw.rect(display_surface, colors(rock_color), back_tile_map[row][column], 8)
 
     pygame.display.update()
     clock.tick(FPS)
