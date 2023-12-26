@@ -53,7 +53,7 @@ class Environment:
         for i in range(self.number_of_herbivores + self.number_of_plants,
                     self.number_of_herbivores + self.number_of_plants + self.number_of_rocks):
             rock_list.append(Rock(i, rock_color, rock_value, required_sample[i][0], required_sample[i][1]))
-        for i in range(self.number_of_carnivores + self.number_of_plants+self.number_of_herbivores,
+        for i in range(self.number_of_rocks + self.number_of_plants+self.number_of_herbivores,
                     self.number_of_carnivores + self.number_of_plants + self.number_of_rocks+self.number_of_herbivores):
             rock_list.append(Rock(i, rock_color, rock_value, required_sample[i][0], required_sample[i][1]))
 
