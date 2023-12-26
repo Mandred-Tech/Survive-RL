@@ -152,7 +152,7 @@ class Herbivore:
 
         elif agent_tile_map[self.row_number][self.column_number] == 2 and obstacle_tile_map[self.row_number][self.column_number] == 0:
             carnivore_obj = object_finder(-1, carnivore_list, self.row_number, self.column_number)
-            carnivore_obj.health += herbivore_carnivore_reward
+            carnivore_obj.health += herbivore_value
             herbivore_list.remove(self)
             
         # Moving rocks in this function instead of updater
@@ -271,7 +271,7 @@ class Carnivore:
 
         elif agent_tile_map[self.row_number][self.column_number] == 1 and obstacle_tile_map[self.row_number][self.column_number] == 0:
             carnivore_obj = object_finder(self.id, carnivore_list, self.row_number, self.column_number)
-            carnivore_obj.health += herbivore_carnivore_reward
+            carnivore_obj.health += herbivore_value
             herbivore_list.remove(self)
             agent_tile_map[self.row_number][self.column_number] = 2
             
@@ -366,7 +366,6 @@ class Rock:
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number], 8)
         obstacle_tile_map[row_number][column_number] = 4
 
-rock_cost_health = 2
 
 def row_checker(row_number):
     if row_number < 0:
