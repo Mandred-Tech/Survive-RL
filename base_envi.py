@@ -10,7 +10,7 @@ from itertools import product
 
 class Environment:
     def __init__(self, number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-                 health_herbivore, health_carnivore):
+                health_herbivore, health_carnivore):
         self.number_of_herbivores = number_of_herbivores
         self.number_of_carnivores = number_of_carnivores
         self.health_herbivore = health_herbivore
@@ -33,7 +33,7 @@ class Environment:
             for column in range(0, len(background_tile_map[0])):
                 rect = pygame.draw.rect(display_surface, colors('light_blue'),
                                         (column * self.size_of_tile, (row * self.size_of_tile) + 50,
-                                         self.size_of_tile - 1, self.size_of_tile - 1), 2)
+                                        self.size_of_tile - 1, self.size_of_tile - 1), 2)
                 background_tile_map[row][column] = pygame.Rect(rect)
         return background_tile_map, agent_tile_map, obstacle_tile_map
 
@@ -47,12 +47,19 @@ class Environment:
         plant_list = []
         rock_list = []
         for i in range(0, self.number_of_herbivores):
-            herbivore_list.append(
-                Herbivore(i, herbivore_color, self.health_herbivore, required_sample[i][0], required_sample[i][1]))
+            herbivore_list.append(Herbivore(i, herbivore_color, self.health_herbivore, required_sample[i][0], required_sample[i][1]))
         for i in range(self.number_of_herbivores, self.number_of_herbivores + self.number_of_plants):
             plant_list.append(Plant(i, plant_color, plant_value, required_sample[i][0], required_sample[i][1]))
         for i in range(self.number_of_herbivores + self.number_of_plants,
-                       self.number_of_herbivores + self.number_of_plants + self.number_of_rocks):
+                    self.number_of_herbivores + self.number_of_plants + self.number_of_rocks):
+            rock_list.append(Rock(i, rock_color, rock_value, required_sample[i][0], required_sample[i][1]))
+
+        for i in range(0, self.number_of_carnivores):
+            carnivore_list.append(Carnivore(i, carnivore_color, self.health_carnivore, required_sample[i][0], required_sample[i][1]))
+        for i in range(self.number_of_carnivores, self.number_of_carnivores + self.number_of_plants):
+            plant_list.append(Plant(i, plant_color, plant_value, required_sample[i][0], required_sample[i][1]))
+        for i in range(self.number_of_carnivores + self.number_of_plants,
+                    self.number_of_carnivores + self.number_of_plants + self.number_of_rocks):
             rock_list.append(Rock(i, rock_color, rock_value, required_sample[i][0], required_sample[i][1]))
 
         return herbivore_list, carnivore_list, plant_list, rock_list
@@ -94,13 +101,16 @@ class Environment:
                     print(herbivore_1.move(3))
                 if event.key == pygame.K_RIGHT:
                     print(herbivore_1.move(4))
+
         display_surface.blit(title_txt, title_txt_rect)
         display_surface.blit(company_txt, company_txt_rect)
         pygame.display.update()
         clock.tick(FPS)
 
     def get_lists(self):
+        global herbivore_list, carnivore_list, plant_list, rock_list
         return herbivore_list, carnivore_list, plant_list, rock_list
+
 
 
 class Herbivore:
@@ -212,6 +222,7 @@ class Herbivore:
         # print(temp_space_list)
         temp_space_list.append(self.health)  # adding health to output to send
         return temp_space_list
+    
 
     def health_check(self):
         # print(self.health)
@@ -310,13 +321,13 @@ class Carnivore:
 
     def observation_space(self):
         min_row = min(self.row_number - observation_space,
-                      self.row_number + observation_space)
+                    self.row_number + observation_space)
         max_row = max(self.row_number - observation_space,
-                      self.row_number + observation_space)
+                    self.row_number + observation_space)
         min_column = min(self.column_number - observation_space,
-                         self.column_number + observation_space)
+                        self.column_number + observation_space)
         max_column = max(self.column_number - observation_space,
-                         self.column_number + observation_space)
+                        self.column_number + observation_space)
         observation_rows = list(range(min_row, max_row + 1))
         observation_columns = list(range(min_column, max_column + 1))
         required_space = list(product(observation_rows, observation_columns))
@@ -388,22 +399,26 @@ def updater():  # this function can be called whenever entire environment has to
         for column in range(0, len(back_tile_map[0])):
             pygame.draw.rect(display_surface, colors('grey'), back_tile_map[row][column])
             pygame.draw.rect(display_surface, colors('light_blue'),
-                             back_tile_map[row][column], 2)
+                            back_tile_map[row][column], 2)
             #Herbivore
             if agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 0:
                 pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
             elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 3:
                 pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
                 plant_obj = object_finder(-1, plant_list, row, column)
-                object_finder(-1, herbivore_list, row, column).health += plant_obj.reward_value
-                plant_list.remove(plant_obj)
-                obstacle_tile_map[row][column] = 0
+                if plant_obj is not None:
+                    herbivore_obj = object_finder(-1, herbivore_list, row, column)
+                    if herbivore_obj is not None:
+                        herbivore_obj.health += plant_obj.reward_value
+                    plant_list.remove(plant_obj)
+                    obstacle_tile_map[row][column] = 0
             elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 4:
                 herbi_obj = object_finder(-1, herbivore_list, row, column)
                 herbivore_list.remove(herbi_obj)
                 print(len(herbivore_list))
                 agent_tile_map[row][column] = 0
                 pygame.draw.rect(display_surface, colors(rock_color), back_tile_map[row][column], 8)
+
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 3:
                 pygame.draw.rect(display_surface, colors(plant_color), back_tile_map[row][column], 5)
             elif agent_tile_map[row][column] == 0 and obstacle_tile_map[row][column] == 4:
@@ -428,11 +443,11 @@ def updater():  # this function can be called whenever entire environment has to
     clock.tick(FPS)
 
 
-def object_finder(idx_avoid, object_list, row,
-                  column):  # Helps to find the object agent or obstacle using index from the list
+def object_finder(idx_avoid, object_list, row, column): 
     for i in object_list:
         if i.row_number == row and i.column_number == column and i.id != idx_avoid:
             return i
+    return None 
 
 
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
@@ -490,11 +505,11 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
 
 def main():
     number_of_herbivores = 5
-    number_of_carnivores = 2
+    number_of_carnivores = 3
     number_of_plants = 10
     number_of_rocks = 8
-    health_herbivore = 20
-    health_carnivore = 20
+    health_herbivore = 50
+    health_carnivore = 50
     plant_reward = 10
     rock_reward = -2
     sim_controller = 'random'
@@ -514,7 +529,10 @@ def main():
         for herbivore in herbivore_list:
             herbivore.move(random.randint(1, 4))
 
-        envi.updater()
+        for carnivore in carnivore_list:
+            carnivore.move(random.randint(1, 4))
+
+        updater()
         pygame.display.update()
         clock.tick(FPS)
 
