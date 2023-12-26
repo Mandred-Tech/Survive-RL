@@ -151,7 +151,6 @@ class Herbivore:
             swapped_herbivore.row_number = prev_row
             swapped_herbivore.column_number = prev_col
             self.health = mean_health(self, swapped_herbivore)
-            swapped_herbivore.health = mean_health(self, swapped_herbivore)
 
         elif agent_tile_map[self.row_number][self.column_number] == 2 and obstacle_tile_map[self.row_number][self.column_number] == 0:
             carnivore_obj = object_finder(-1, carnivore_list, self.row_number, self.column_number)
@@ -272,7 +271,6 @@ class Carnivore:
             swapped_carnivore.row_number = prev_row
             swapped_carnivore.column_number = prev_col
             self.health = mean_health(self, swapped_carnivore)
-            swapped_carnivore.health = mean_health(self, swapped_carnivore)
 
         elif agent_tile_map[self.row_number][self.column_number] == 1 and obstacle_tile_map[self.row_number][self.column_number] == 0:
             herbivore_obj = object_finder(-1, herbivore_list, self.row_number, self.column_number)
