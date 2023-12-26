@@ -6,7 +6,7 @@ import pygame
 from config import colors, fonts
 import random
 from itertools import product
-
+import math
 
 class Environment:
     def __init__(self, number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
@@ -144,12 +144,13 @@ class Herbivore:
                 mover = [0, -1]
         # print(self.row_number, self.column_number)
         if agent_tile_map[self.row_number][self.column_number] == 1:
-            agent_tile_map[prev_row][prev_col] = 1
+            agent_tile_map[prev_row][prev_col] = 1            
             swapped_herbivore = object_finder(self.id, herbivore_list, self.row_number, self.column_number)
             # print(swapped_herbivore.row_number, swapped_herbivore.column_number)
             # print(self.row_number,self.column_number)
             swapped_herbivore.row_number = prev_row
             swapped_herbivore.column_number = prev_col
+            mean_health_value = mean_health(self, swapped_herbivore)
 
         elif agent_tile_map[self.row_number][self.column_number] == 2 and obstacle_tile_map[self.row_number][self.column_number] == 0:
             carnivore_obj = object_finder(-1, carnivore_list, self.row_number, self.column_number)
@@ -269,6 +270,7 @@ class Carnivore:
             # print(self.row_number,self.column_number)
             swapped_carnivore.row_number = prev_row
             swapped_carnivore.column_number = prev_col
+            mean_health_value = mean_health(self, swapped_carnivore)
 
         elif agent_tile_map[self.row_number][self.column_number] == 1 and obstacle_tile_map[self.row_number][self.column_number] == 0:
             herbivore_obj = object_finder(-1, herbivore_list, self.row_number, self.column_number)
@@ -367,6 +369,11 @@ class Rock:
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number], 8)
         obstacle_tile_map[row_number][column_number] = 4
 
+def mean_health(agent1, agent2):
+    if isinstance(agent1, Herbivore) and isinstance(agent2, Herbivore):
+        return (math.ceil(agent1.health + agent2.health) / 2)
+    elif isinstance(agent1, Carnivore) and isinstance(agent2, Carnivore):
+        return (math.ceil(agent1.health + agent2.health) / 2)
 
 def row_checker(row_number):
     if row_number < 0:
@@ -389,7 +396,7 @@ def updater():  # this function can be called whenever entire environment has to
         for column in range(0, len(back_tile_map[0])):
             pygame.draw.rect(display_surface, colors('grey'), back_tile_map[row][column])
             pygame.draw.rect(display_surface, colors('light_blue'),
-                             back_tile_map[row][column], 2)
+                            back_tile_map[row][column], 2)
             if agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 0:
                 pygame.draw.rect(display_surface, colors(herbivore_color), back_tile_map[row][column])
             elif agent_tile_map[row][column] == 1 and obstacle_tile_map[row][column] == 3:
