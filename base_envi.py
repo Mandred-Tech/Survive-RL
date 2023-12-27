@@ -91,8 +91,7 @@ class Environment:
 
         a, b = game_master()
         if a == True:
-            if b == None or b == "Draw" or b == "Herbivore Wins" or b == "Carnivore Wins":
-                return True, None
+            return a, b
 
         return False, None
 
@@ -472,16 +471,16 @@ def object_finder(idx_avoid, object_list, row, column):
     return None
 
 
-def game_master(user_steps, herbivore_steps, carnivore_steps):
+def game_master():
     if user_steps == 0:
         return True, None
-    elif herbivore_steps == 0 and carnivore_steps ==0:
+    elif len(herbivore_list) == 0 and len(carnivore_list) ==0:
         return True, "Draw"
 
-    elif herbivore_steps == 0:
+    elif len(herbivore_list) == 0:
         return True, "Carnivore Wins"
     
-    elif carnivore_steps == 0:
+    elif len(carnivore_list) == 0:
         return True, "Herbivore Wins"
 
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
