@@ -150,7 +150,7 @@ class Herbivore:
             # print(self.row_number,self.column_number)
             swapped_herbivore.row_number = prev_row
             swapped_herbivore.column_number = prev_col
-            self.health = mean_health(self, swapped_herbivore)
+            mean_health(self, swapped_herbivore)
 
         elif agent_tile_map[self.row_number][self.column_number] == 2 and obstacle_tile_map[self.row_number][self.column_number] == 0:
             carnivore_obj = object_finder(-1, carnivore_list, self.row_number, self.column_number)
@@ -270,7 +270,7 @@ class Carnivore:
             # print(self.row_number,self.column_number)
             swapped_carnivore.row_number = prev_row
             swapped_carnivore.column_number = prev_col
-            self.health = mean_health(self, swapped_carnivore)
+            mean_health(self, swapped_carnivore)
 
         elif agent_tile_map[self.row_number][self.column_number] == 1 and obstacle_tile_map[self.row_number][self.column_number] == 0:
             herbivore_obj = object_finder(-1, herbivore_list, self.row_number, self.column_number)
@@ -370,7 +370,7 @@ class Rock:
         obstacle_tile_map[row_number][column_number] = 4
 
 def mean_health(agent1, agent2):
-    mean_health = (math.ceil((agent1.health + agent2.health) / 2))
+    mean_health= (math.ceil(agent1.health + agent2.health) / 2)
     agent1.health = mean_health
     agent2.health = mean_health
 
