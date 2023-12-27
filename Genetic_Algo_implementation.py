@@ -6,8 +6,17 @@ import matplotlib.pyplot as plt
 
 
 class GeneticAlgo:
-    def __init__(self):
-        pass
+    def __init__(self, input_layer_shape, input_layer_neurons, number_of_hidden_layers, hidden_layer_neurons,
+                 output_layer_shape, output_layer_neurons, inner_layer_activation, outer_layer_activation,
+                 ):
+        self.input_layer_shape = input_layer_shape
+        self.input_layer_neurons = input_layer_neurons
+        self.number_of_hidden_layers = number_of_hidden_layers
+        self.hidden_layer_neurons = hidden_layer_neurons
+        self.output_layer_shape = output_layer_shape
+        self.output_layer_neurons = output_layer_neurons
+        self.inner_layer_activation = inner_layer_activation
+        self.outer_layer_activation = outer_layer_activation
 
     def nn_creation(self):
         pass
@@ -31,7 +40,7 @@ class NeuralNet:
         self.inner_layer_activation = inner_layer_activation
         self.outer_layer_activation = outer_layer_activation
         self.model = self.create_model()
-        self.weights = 
+        self.weights = self.model.get_weights()[0]
 
     def create_model(self):
         neural = Sequential()

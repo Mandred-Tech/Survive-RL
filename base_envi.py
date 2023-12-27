@@ -69,24 +69,30 @@ class Environment:
             if event.type == pygame.QUIT:
                 return True, None
 
-        if self.user_steps <= 0:
-            return True, None
-
         display_surface.blit(title_txt, title_txt_rect)
         display_surface.blit(company_txt, company_txt_rect)
         match simulation_controller:
             case 'random':
+                self.user_steps -= 1
+                # print(self.user_steps)
                 self.random_move(herbivore_list)
                 self.random_move(carnivore_list)
+                a, b = game_master(self.user_steps)
+                if a == True:
+                    return True, b
             case 'custom':
+                if agent == None:
+                    return True, "No agent"
+                self.user_steps -= 1
+                a, b = game_master(self.user_steps)
+                if a == True:
+                    return True, b
                 return False, agent.move(action)
             case _:
                 print("Wrong Simulation controller. Please check!")
                 return True, None
 
-        self.user_steps -= 1
         # print(self.user_steps)
-
         return False, None
 
     def stop(self):
@@ -94,7 +100,7 @@ class Environment:
         return True
 
     def random_move(self, agent_list):
-        for i in agent_list:
+        for i in agent_list[0:len(agent_list) - 1]:
             i.move(random.randint(1, 4))
 
     def test_move(self, agent):  # for manually moving a particular agent
@@ -118,23 +124,26 @@ class Environment:
 
     def get_lists(self):
         global herbivore_list, carnivore_list, plant_list, rock_list
+        herbivore_list.append(None)
+        carnivore_list.append(None)
         return herbivore_list, carnivore_list, plant_list, rock_list
 
 
 class Herbivore:
     def __init__(self, identifier, color, health, row_number, column_number):
+        self.name = 'h'
         self.id = identifier
         self.color = color
         self.health = health
         self.row_number = row_number
         self.column_number = column_number
         self.storage = [0]
-        self.herbivore_steps=0
+        self.herbivore_steps = 0
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number])
         agent_tile_map[row_number][column_number] = 1
 
     def move(self, direction):
-        self.herbivore_steps+=1
+        self.herbivore_steps += 1
         prev_row = self.row_number
         prev_col = self.column_number
         mover = [0, 0]  # variable to find what was the previous move of the agent
@@ -245,18 +254,19 @@ class Herbivore:
 
 class Carnivore:
     def __init__(self, identifier, color, health, row_number, column_number):
+        self.name = 'c'
         self.id = identifier
         self.color = color
         self.health = health
         self.row_number = row_number
         self.column_number = column_number
         self.storage = [0]
-        self.carnivore_steps=0
+        self.carnivore_steps = 0
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number])
         agent_tile_map[row_number][column_number] = 2
 
     def move(self, direction):
-        self.carnivore_steps+=1
+        self.carnivore_steps += 1
         prev_row = self.row_number
         prev_col = self.column_number
         mover = [0, 0]  # variable to find what was the previous move of the agent
@@ -390,8 +400,8 @@ class Rock:
 
 def mean_health(agent1, agent2):
     mean_health = (math.ceil(agent1.health + agent2.health) / 2)
-    agent1.health = mean_health
-    agent2.health = mean_health
+    agent1.health = int(mean_health)
+    agent2.health = int(mean_health)
 
 
 def row_checker(row_number):
@@ -465,6 +475,24 @@ def object_finder(idx_avoid, object_list, row, column):
     return None
 
 
+def game_master(user_st):
+    if user_st <= 0:
+        if len(herbivore_list) > len(carnivore_list):
+            return True, "Herbivore Wins"
+        elif len(herbivore_list) < len(carnivore_list):
+            return True, "Carnivore Wins"
+        elif len(herbivore_list) == len(carnivore_list):
+            return True, "Draw"
+    else:
+        if len(herbivore_list) == 1:
+            return True, "Carnivore Wins"
+
+        elif len(carnivore_list) == 1:
+            return True, "Herbivore Wins"
+        else:
+            return False, None
+
+
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
                health_herbivore, health_carnivore, herbivore_reward=15, plant_reward=10, rock_reward=-2,
                sim_controller='random',
@@ -514,6 +542,8 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     global carnivore_list
     global rock_list
     global plant_list
+    global herbivore_list_pointer
+    global carnivore_list_pointer
     back_tile_map, agent_tile_map, obstacle_tile_map = envi.background_tile_map_layer(display_surface)
     herbivore_list, carnivore_list, plant_list, rock_list = envi.environment_setter()
     global simulation_controller
