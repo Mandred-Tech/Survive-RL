@@ -73,7 +73,11 @@ class Environment:
                 self.random_move(herbivore_list)
                 self.random_move(carnivore_list)
             case 'custom':
-                return False, agent.move(action)
+                obs = agent.move(action)
+                if obs is not None:
+                    return False, obs
+                else:
+                    return True, observation_list_length()
             case _:
                 print("Wrong Simulation controller. Please check!")
                 return True, None
@@ -93,13 +97,13 @@ class Environment:
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    print(agent.move(1))
+                    print(self.step(agent,1))
                 if event.key == pygame.K_DOWN:
-                    print(agent.move(2))
+                    print(self.step(agent,2))
                 if event.key == pygame.K_LEFT:
-                    print(agent.move(3))
+                    print(self.step(agent,3))
                 if event.key == pygame.K_RIGHT:
-                    print(agent.move(4))
+                    print(self.step(agent,4))
 
         display_surface.blit(title_txt, title_txt_rect)
         display_surface.blit(company_txt, company_txt_rect)
@@ -189,14 +193,15 @@ class Herbivore:
             agent_tile_map[self.row_number][self.column_number] = 1
         updater()
         dead = self.health_check()
+        updater()
         if simulation_controller != "random" and dead != 0:
-            return self.observation_space()
+            return self.observation_space_finder()
         else:
-            return
+            return None
         # print(agent_tile_map[self.row_number][self.column_number],agent_tile_map[prev_row][prev_col])
         # print(obstacle_tile_map[self.row_number][self.column_number],obstacle_tile_map[prev_row][prev_col])
 
-    def observation_space(self):
+    def observation_space_finder(self):
         min_row = min(self.row_number - observation_space,
                       self.row_number + observation_space)
         max_row = max(self.row_number - observation_space,
@@ -309,14 +314,15 @@ class Carnivore:
             agent_tile_map[self.row_number][self.column_number] = 2
         updater()
         dead = self.health_check()
+        updater()
         if simulation_controller != "random" and dead != 0:
-            return self.observation_space()
+            return self.observation_space_finder()
         else:
-            return
+            return None
         # print(agent_tile_map[self.row_number][self.column_number],agent_tile_map[prev_row][prev_col])
         # print(obstacle_tile_map[self.row_number][self.column_number],obstacle_tile_map[prev_row][prev_col])
 
-    def observation_space(self):
+    def observation_space_finder(self):
         min_row = min(self.row_number - observation_space,
                       self.row_number + observation_space)
         max_row = max(self.row_number - observation_space,
@@ -447,6 +453,12 @@ def object_finder(idx_avoid, object_list, row, column):
         if i.row_number == row and i.column_number == column and i.id != idx_avoid:
             return i
     return None
+
+
+def observation_list_length():  # For finding out the length of the observation list and adding 0 health on death
+    obs_list = [-1] * (sum(list(range(observation_space, 0, -1))) *8)
+    obs_list.append(0)
+    return obs_list
 
 
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,

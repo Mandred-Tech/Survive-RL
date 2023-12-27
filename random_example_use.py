@@ -11,5 +11,5 @@ done = False
 while not done:
     # done, _ = env.step()
     # done, obs = env.step(herbivore_list[0], 1)
-    env.test_move(carnivore_list[0])
+    env.test_move(herbivore_list[0])
 env.stop()
