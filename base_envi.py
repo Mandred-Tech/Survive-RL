@@ -10,7 +10,7 @@ import math
 
 class Environment:
     def __init__(self, number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-                health_herbivore, health_carnivore):
+                health_herbivore, health_carnivore, user_steps):
         self.number_of_herbivores = number_of_herbivores
         self.number_of_carnivores = number_of_carnivores
         self.health_herbivore = health_herbivore
@@ -22,6 +22,7 @@ class Environment:
         self.window_height = 600
         self.number_of_rows = self.window_height // self.size_of_tile
         self.number_of_columns = self.window_width // self.size_of_tile
+        self.user_steps = user_steps
         print(self.number_of_rows, self.number_of_columns)
 
     def background_tile_map_layer(self, display_surface):
@@ -60,10 +61,16 @@ class Environment:
         return herbivore_list, carnivore_list, plant_list, rock_list
 
     def step(self, agent=None, action=None):
-        user_step 
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return True, None
+            
+        while user_steps > 0:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return True, None
+                
         display_surface.blit(title_txt, title_txt_rect)
         display_surface.blit(company_txt, company_txt_rect)
         match simulation_controller:
@@ -76,6 +83,7 @@ class Environment:
                 print("Wrong Simulation controller. Please check!")
                 return True, None
             
+        user_steps -= 1
 
         return False, None
 
@@ -113,7 +121,7 @@ class Environment:
 
 
 class Herbivore:
-    def __init__(self, identifier, color, health, row_number, column_number):
+    def __init__(self, identifier, color, health, row_number, column_number, herbivore_steps):
         self.id = identifier
         self.color = color
         self.health = health
@@ -122,6 +130,7 @@ class Herbivore:
         self.storage = [0]
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number])
         agent_tile_map[row_number][column_number] = 1
+        self.herbivore_steps =0
 
     def move(self, direction):
         self.herbivore_steps += 1
@@ -234,7 +243,7 @@ class Herbivore:
 
 
 class Carnivore:
-    def __init__(self, identifier, color, health, row_number, column_number):
+    def __init__(self, identifier, color, health, row_number, column_number, carnivore_steps):
         self.id = identifier
         self.color = color
         self.health = health
@@ -243,9 +252,10 @@ class Carnivore:
         self.storage = [0]
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number])
         agent_tile_map[row_number][column_number] = 2
+        self.carnivore_steps =0
 
     def move(self, direction):
-        self.carnivore +=1
+        self.carnivore_steps +=1
         prev_row = self.row_number
         prev_col = self.column_number
         mover = [0, 0]  # variable to find what was the previous move of the agent
@@ -353,8 +363,6 @@ class Carnivore:
             return 1
         
 
-
-
 class Plant:
     def __init__(self, identifier, color, value, row_number, column_number):
         self.id = identifier
@@ -452,7 +460,7 @@ def object_finder(idx_avoid, object_list, row, column):
 
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
                health_herbivore, health_carnivore, herbivore_reward =15,plant_reward=10, rock_reward=-2, sim_controller='random',
-               obs_space=1,speed=30):
+               obs_space=1,speed=30, available_steps = 200):
     pygame.init()
     global WINDOW_WIDTH
     global WINDOW_HEIGHT
@@ -477,7 +485,7 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     rock_value = rock_reward
     herbivore_value = herbivore_reward
     global user_steps
-    user_steps = 200
+    user_steps = available_steps
     global FPS
     global clock
     FPS = speed
@@ -490,7 +498,7 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     title_txt, title_txt_rect = fonts('font3', 40, "Survive RL", (100, 25), colors('light_green'))
     company_txt, company_txt_rect = fonts('font3', 40, "Mandred Tech", (1375, 680), colors('light_red'))
     envi = Environment(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-                       health_herbivore, health_carnivore)
+                       health_herbivore, health_carnivore, user_steps)
     global back_tile_map
     global agent_tile_map
     global obstacle_tile_map
