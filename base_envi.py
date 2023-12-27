@@ -66,7 +66,7 @@ class Environment:
             if event.type == pygame.QUIT:
                 return True, None
             
-        if user_steps <0:
+        if user_steps <=0:
             return True, None
                 
         display_surface.blit(title_txt, title_txt_rect)
