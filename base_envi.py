@@ -83,11 +83,15 @@ class Environment:
             case 'custom':
                 if agent == None:
                     return True, "No agent"
-                self.user_steps -= 1
+                self.user_steps -= 1/(self.number_of_herbivores+self.number_of_carnivores)
                 a, b = game_master(self.user_steps)
                 if a == True:
                     return True, b
-                return False, agent.move(action)
+                ob=agent.move(action)
+                if ob!='Dead':
+                    return False, ob
+                else:
+                    return True, ob
             case _:
                 print("Wrong Simulation controller. Please check!")
                 return True, None
@@ -143,6 +147,8 @@ class Herbivore:
         agent_tile_map[row_number][column_number] = 1
 
     def move(self, direction):
+        if self.id not in [i.id for i in herbivore_list[-2::-1]]:
+            return "Dead"
         self.herbivore_steps += 1
         prev_row = self.row_number
         prev_col = self.column_number
@@ -210,10 +216,11 @@ class Herbivore:
             agent_tile_map[self.row_number][self.column_number] = 1
         updater()
         dead = self.health_check()
+        # print(dead)
         if simulation_controller != "random" and dead != 0:
             return self.observation_space()
         else:
-            return
+            return "Dead"
         # print(agent_tile_map[self.row_number][self.column_number],agent_tile_map[prev_row][prev_col])
         # print(obstacle_tile_map[self.row_number][self.column_number],obstacle_tile_map[prev_row][prev_col])
 
@@ -245,7 +252,8 @@ class Herbivore:
     def health_check(self):
         # print(self.health)
         if self.health <= 0:
-            herbivore_list.remove(self)
+            if self.id in [i.id for i in herbivore_list[-2::-1]]:
+                herbivore_list.remove(self)
             agent_tile_map[self.row_number][self.column_number] = 0
             return 0
         else:
@@ -266,6 +274,8 @@ class Carnivore:
         agent_tile_map[row_number][column_number] = 2
 
     def move(self, direction):
+        if self.id not in [i.id for i in carnivore_list[-2::-1]]:
+            return "Dead"
         self.carnivore_steps += 1
         prev_row = self.row_number
         prev_col = self.column_number
@@ -337,7 +347,7 @@ class Carnivore:
         if simulation_controller != "random" and dead != 0:
             return self.observation_space()
         else:
-            return
+            return "Dead"
         # print(agent_tile_map[self.row_number][self.column_number],agent_tile_map[prev_row][prev_col])
         # print(obstacle_tile_map[self.row_number][self.column_number],obstacle_tile_map[prev_row][prev_col])
 
@@ -369,7 +379,8 @@ class Carnivore:
     def health_check(self):
         # print(self.health)
         if self.health <= 0:
-            carnivore_list.remove(self)
+            if self.id in [i.id for i in carnivore_list[-2::-1]]:
+                carnivore_list.remove(self)
             agent_tile_map[self.row_number][self.column_number] = 0
             return 0
         else:
