@@ -11,6 +11,9 @@ def colors(color):  # Function to define colors used in the environment
     light_red = (255, 102, 102)
     light_green = (102, 255, 102)
     light_blue = (102, 255, 255)
+    orange = (255, 177, 42)
+    blue_green = (18, 168, 181)
+    purple = (197, 95, 255)
     match color:
         case 'white':
             return white
@@ -30,6 +33,12 @@ def colors(color):  # Function to define colors used in the environment
             return light_blue
         case 'grey':
             return grey
+        case 'orange':
+            return orange
+        case 'blue_green':
+            return blue_green
+        case 'purple':
+            return purple
 
 
 def fonts(font_name, size, text, location, color):  # Function to define fonts

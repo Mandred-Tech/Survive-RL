@@ -24,7 +24,7 @@ class Environment:
         self.number_of_rows = self.window_height // self.size_of_tile
         self.number_of_columns = self.window_width // self.size_of_tile
         self.user_steps = user_steps
-        print(self.number_of_rows, self.number_of_columns)
+        # print(self.number_of_rows, self.number_of_columns)
 
     def background_tile_map_layer(self, display_surface):
         background_tile_map = [[0] * self.number_of_columns for i in range(0, self.number_of_rows)]
@@ -69,8 +69,18 @@ class Environment:
             if event.type == pygame.QUIT:
                 return True, None
 
+        herbivore_health_txt, herbivore_health_txt_rect = fonts('font2', 25,
+                                                                "Herbivore Health : " + str(mean_population_health(herbivore_list)),
+                                                                (600, 25), colors('white'))
+        carnivore_health_txt, carnivore_health_txt_rect = fonts('font2', 25,
+                                                                "Carnivore Health : " + str(mean_population_health(carnivore_list)),
+                                                                (1200, 25), colors('white'))
+        pygame.draw.rect(display_surface, colors('blue_green'), (0,0,2000,50))
+        pygame.draw.rect(display_surface, colors('blue_green'), (0, 650, 2000, 800))
         display_surface.blit(title_txt, title_txt_rect)
         display_surface.blit(company_txt, company_txt_rect)
+        display_surface.blit(herbivore_health_txt, herbivore_health_txt_rect)
+        display_surface.blit(carnivore_health_txt, carnivore_health_txt_rect)
         match simulation_controller:
             case 'random':
                 self.user_steps -= 1
@@ -83,12 +93,12 @@ class Environment:
             case 'custom':
                 if agent == None:
                     return True, "No agent"
-                self.user_steps -= 1/(self.number_of_herbivores+self.number_of_carnivores)
+                self.user_steps -= 1 / (self.number_of_herbivores + self.number_of_carnivores)
                 a, b = game_master(self.user_steps)
                 if a == True:
                     return True, b
-                ob=agent.move(action)
-                if ob!='Dead':
+                ob = agent.move(action)
+                if ob != 'Dead':
                     return False, ob
                 else:
                     return True, ob
@@ -432,6 +442,7 @@ def column_checker(column_number):
 
 
 def updater():  # this function can be called whenever entire environment has to be changed based on changes in tile-map
+    # display_surface.fill(colors('grey'))
     for row in range(0, len(back_tile_map)):
         for column in range(0, len(back_tile_map[0])):
             pygame.draw.rect(display_surface, colors('grey'), back_tile_map[row][column])
@@ -487,13 +498,19 @@ def object_finder(idx_avoid, object_list, row, column):
 
 
 def game_master(user_st):
-    if user_st <= 0:
+    if user_st <= 1:
         if len(herbivore_list) > len(carnivore_list):
             return True, "Herbivore Wins"
         elif len(herbivore_list) < len(carnivore_list):
             return True, "Carnivore Wins"
         elif len(herbivore_list) == len(carnivore_list):
-            return True, "Draw"
+            if mean_population_health(herbivore_list)>mean_population_health(carnivore_list):
+                return True, "Herbivore Wins"
+            elif mean_population_health(herbivore_list)<mean_population_health(carnivore_list):
+                return True, "Carnivore Wins"
+            else:
+                return True, "Herbivore Wins" # After all these cases if again mean health same then herbivore winner
+                # by default
     else:
         if len(herbivore_list) == 1:
             return True, "Carnivore Wins"
@@ -502,6 +519,18 @@ def game_master(user_st):
             return True, "Herbivore Wins"
         else:
             return False, None
+
+
+def mean_population_health(agent_list):
+    s = 0
+    for i in agent_list[-2::-1]:
+        s += i.health
+    if len(agent_list)-1!=0:
+        mean_pop=s//(len(agent_list)-1)
+    else:
+        mean_pop=0
+    # print("Mean pop:", mean_pop)
+    return mean_pop
 
 
 def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
@@ -542,8 +571,14 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     global title_txt_rect
     global company_txt
     global company_txt_rect
+    global herbivore_health_txt
+    global herbivore_health_txt_rect
+    global carnivore_health_txt
+    global carnivore_health_txt_rect
     title_txt, title_txt_rect = fonts('font3', 40, "Survive RL", (100, 25), colors('light_green'))
     company_txt, company_txt_rect = fonts('font3', 40, "Mandred Tech", (1375, 680), colors('light_red'))
+    herbivore_health_txt, herbivore_health_txt_rect = fonts('font2', 25, "Herbivore Health : "+str(health_herbivore), (600, 25), colors('white'))
+    carnivore_health_txt, carnivore_health_txt_rect = fonts('font2', 25, "Carnivore Health : "+str(health_carnivore), (1200, 25), colors('white'))
     envi = Environment(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
                        health_herbivore, health_carnivore)
     global back_tile_map
@@ -553,8 +588,6 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     global carnivore_list
     global rock_list
     global plant_list
-    global herbivore_list_pointer
-    global carnivore_list_pointer
     back_tile_map, agent_tile_map, obstacle_tile_map = envi.background_tile_map_layer(display_surface)
     herbivore_list, carnivore_list, plant_list, rock_list = envi.environment_setter()
     global simulation_controller
@@ -562,3 +595,9 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     global observation_space
     observation_space = obs_space
     return envi
+
+
+print("WELCOME TO SURVIVE_RL")
+print("MANDRED TECH 🚀 - OPEN LICENCE")
+print("Number of Rows : 24   Number of Columns : 60")
+print()
