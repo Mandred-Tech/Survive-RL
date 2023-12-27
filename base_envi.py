@@ -10,7 +10,7 @@ import math
 
 class Environment:
     def __init__(self, number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-                health_herbivore, health_carnivore, user_steps):
+                health_herbivore, health_carnivore):
         self.number_of_herbivores = number_of_herbivores
         self.number_of_carnivores = number_of_carnivores
         self.health_herbivore = health_herbivore
@@ -66,7 +66,7 @@ class Environment:
             if event.type == pygame.QUIT:
                 return True, None
             
-        if user_steps <=0:
+        if self.user_steps <=0:
             return True, None
                 
         display_surface.blit(title_txt, title_txt_rect)
@@ -81,7 +81,7 @@ class Environment:
                 print("Wrong Simulation controller. Please check!")
                 return True, None
             
-        user_steps -= 1
+        self.user_steps -= 1
 
         return False, None
 
@@ -119,7 +119,7 @@ class Environment:
 
 
 class Herbivore:
-    def __init__(self, identifier, color, health, row_number, column_number, herbivore_steps):
+    def __init__(self, identifier, color, health, row_number, column_number):
         self.id = identifier
         self.color = color
         self.health = health
@@ -128,10 +128,8 @@ class Herbivore:
         self.storage = [0]
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number])
         agent_tile_map[row_number][column_number] = 1
-        self.herbivore_steps =0
 
     def move(self, direction):
-        self.herbivore_steps += 1
         prev_row = self.row_number
         prev_col = self.column_number
         mover = [0, 0]  # variable to find what was the previous move of the agent
@@ -241,7 +239,7 @@ class Herbivore:
 
 
 class Carnivore:
-    def __init__(self, identifier, color, health, row_number, column_number, carnivore_steps):
+    def __init__(self, identifier, color, health, row_number, column_number):
         self.id = identifier
         self.color = color
         self.health = health
@@ -250,10 +248,8 @@ class Carnivore:
         self.storage = [0]
         pygame.draw.rect(display_surface, colors(self.color), back_tile_map[row_number][column_number])
         agent_tile_map[row_number][column_number] = 2
-        self.carnivore_steps =0
 
     def move(self, direction):
-        self.carnivore_steps +=1
         prev_row = self.row_number
         prev_col = self.column_number
         mover = [0, 0]  # variable to find what was the previous move of the agent
@@ -496,7 +492,7 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     title_txt, title_txt_rect = fonts('font3', 40, "Survive RL", (100, 25), colors('light_green'))
     company_txt, company_txt_rect = fonts('font3', 40, "Mandred Tech", (1375, 680), colors('light_red'))
     envi = Environment(number_of_herbivores, number_of_carnivores, number_of_plants, number_of_rocks,
-                       health_herbivore, health_carnivore, user_steps)
+                       health_herbivore, health_carnivore)
     global back_tile_map
     global agent_tile_map
     global obstacle_tile_map
