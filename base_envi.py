@@ -60,6 +60,7 @@ class Environment:
         return herbivore_list, carnivore_list, plant_list, rock_list
 
     def step(self, agent=None, action=None):
+        user_step 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return True, None
@@ -74,6 +75,8 @@ class Environment:
             case _:
                 print("Wrong Simulation controller. Please check!")
                 return True, None
+            
+
         return False, None
 
     def stop(self):
@@ -121,6 +124,7 @@ class Herbivore:
         agent_tile_map[row_number][column_number] = 1
 
     def move(self, direction):
+        self.herbivore_steps += 1
         prev_row = self.row_number
         prev_col = self.column_number
         mover = [0, 0]  # variable to find what was the previous move of the agent
@@ -241,6 +245,7 @@ class Carnivore:
         agent_tile_map[row_number][column_number] = 2
 
     def move(self, direction):
+        self.carnivore +=1
         prev_row = self.row_number
         prev_col = self.column_number
         mover = [0, 0]  # variable to find what was the previous move of the agent
@@ -346,6 +351,8 @@ class Carnivore:
             return 0
         else:
             return 1
+        
+
 
 
 class Plant:
@@ -469,6 +476,8 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
     plant_value = plant_reward
     rock_value = rock_reward
     herbivore_value = herbivore_reward
+    global user_steps
+    user_steps = 200
     global FPS
     global clock
     FPS = speed
