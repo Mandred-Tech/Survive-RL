@@ -66,10 +66,8 @@ class Environment:
             if event.type == pygame.QUIT:
                 return True, None
             
-        while user_steps > 0:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    return True, None
+        while user_steps >=0:
+            return True, None
                 
         display_surface.blit(title_txt, title_txt_rect)
         display_surface.blit(company_txt, company_txt_rect)
