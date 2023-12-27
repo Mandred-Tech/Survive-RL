@@ -1,8 +1,8 @@
 import random
 
-from base_envi import Simulation, Herbivore
+from base_envi import Simulation
 
-env = Simulation(2, 10, 10, 10, 100, 100,10, 10, -10, 'custom', 2,60)
+env = Simulation(10, 10, 10, 10, 100, 100,10, 10, -10, 'custom', 2,60,100)
 
 herbivore_list, carnivore_list, _, _ = env.get_lists()
 done = False
@@ -11,5 +11,5 @@ done = False
 while not done:
     # done, _ = env.step()
     # done, obs = env.step(herbivore_list[0], 1)
-    env.test_move(herbivore_list[0])
+    env.test_move(carnivore_list[0])
 env.stop()
