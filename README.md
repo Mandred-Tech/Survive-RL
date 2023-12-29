@@ -36,7 +36,7 @@ in Simulation function. Its default value is 1.
 ### Check the random_test.py for running the simulation for n number of times and storing in the csv.
 ### Check the custom_use_example.py for running the simulation by specifying the agents movements.
 
-####MIT License with Attribution
+MIT License with Attribution
 
 Copyright (c) [2023] [Mandred Tech]
 
