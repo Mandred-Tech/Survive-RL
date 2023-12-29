@@ -1,4 +1,4 @@
-![What is this](Logo.png)
+![Logo](Logo.png)
 # Survive-RL
 The reinforcement learning environment with advanced interaction between the agents.
 
