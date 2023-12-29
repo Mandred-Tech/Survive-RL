@@ -33,5 +33,5 @@ The output of each step is:
 - (n+(n-1)+(n-2)+....1) * 8 where n is the value of obs_space variable
 in Simulation function. Its default value is 1.
 
-# Check the random_test.py for running the simulation for n number of times and storing in the csv.
-# Check the custom_use_example.py for running the simulation by specifying the agents movements.
+### Check the random_test.py for running the simulation for n number of times and storing in the csv.
+### Check the custom_use_example.py for running the simulation by specifying the agents movements.
