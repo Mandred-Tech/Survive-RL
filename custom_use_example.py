@@ -1,23 +1,22 @@
-# Running Random simulations for n number of times and storing results in csv
-import random
+# Running the simulation with custom agent action.
 
+import random
 from base_envi import Simulation
 import pandas as pd
 
 number_of_simulations = 5
 for i in range(0, number_of_simulations):
-    env = Simulation(5, 5, 100, 50, 100, 100, 10, 10, -10, 'custom', 1, 30, 50)
+    env = Simulation(5, 5, 100, 50, 100, 100, 10, 10, -10, 'custom', 1, 30, 50) # custom mode
     herbivore_list, carnivore_list, _, _ = env.get_lists()
     herbi1, herbi2, herbi3, herbi4, herbi5 = herbivore_list[0], herbivore_list[1], herbivore_list[2], herbivore_list[3], \
-                                             herbivore_list[4]
+                                             herbivore_list[4] # Adding herbivore objects
     carni1, carni2, carni3, carni4, carni5 = carnivore_list[0], carnivore_list[1], carnivore_list[2], carnivore_list[3], \
-                                             carnivore_list[4]
+                                             carnivore_list[4] # Adding carnivore objects
     done = 0
     obs=0
     counter=0
-    # print(carni1.observation_space())
     while done == 0:
-        d1, obs1 = env.step(carni1, 1)
+        d1, obs1 = env.step(carni1, 1) # stepping agents with an action. Ideally a neural net or a policy function can be used to pass actions.
         # print("1",d1,obs1)
         d2, obs2 = env.step(carni2, 2)
         # print("2",d2, obs2)
@@ -39,10 +38,8 @@ for i in range(0, number_of_simulations):
         # print("5h", d10, obs10)
         # print(carni1,carni2,carni3,carni4,carni5)
         # print(len(carnivore_list),len(herbivore_list))
-        done= d1 and d2 and d3 and d4 and d5 and d6 and d7 and d8 and d9 and d10
+        done= d1 and d2 and d3 and d4 and d5 and d6 and d7 and d8 and d9 and d10 #checking if all agents are returning true
         obs=obs10
         counter += 1
     print("Final Done: "+str(i)+" : "+str(done)+" : "+str(obs)+" : "+str(counter))
-    # print(done,obs)
-    # print(len(herbivore_list),len(carnivore_list))
     env.stop()
