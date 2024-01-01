@@ -572,6 +572,6 @@ def Simulation(number_of_herbivores, number_of_carnivores, number_of_plants, num
 
 
 print("WELCOME TO SURVIVE_RL")
-print("MANDRED TECH 🚀 - OPEN LICENCE")
+print("MANDRED TECH 🚀 - MIT LICENCE")
 print("Number of Rows : 24   Number of Columns : 60")
 print()
