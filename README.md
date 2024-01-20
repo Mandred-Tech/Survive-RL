@@ -16,7 +16,7 @@ from the environment and one rock is left.
 5. When rock is pushed on another block containing plant, then the plant is removed
 from the environment and rock is left.
 6. When an agent tries to move to another similar agent block, then they swap their locations
-and the health of each agent is mean of the total health of both agents.(health meaning is not yet implemented)
+and the health of each agent is mean of the total health of both agents.(mean= (health1+health2)/2)
 7. When Herbivore tries to move to carnivore position or vice versa, the herbivore is
 removed from the environment and carnivore gains a reward.(default is +10 gain in health)
 
