@@ -33,11 +33,14 @@ The output of each step is:
 - (n+(n-1)+(n-2)+....1) * 8 where n is the value of obs_space variable
 in Simulation function. Its default value is 1.
 
-### Check the random_test.py for running the simulation for n number of times and storing in the csv.
-### Check the custom_use_example.py for running the simulation by specifying the agents movements.
-### Check the Genetic_Algo_implementation.py for running a basic genetic algorithm.
+### How to use it
+- Clone this repository in your workspace or just download the files manually.
+- Run the random_test.py which shows how to start the simulation for n number of times and storing the result in the csv.
+- Run the custom_use_example.py which shows how to run the simulation by specifying the agents movements manually or using any function.
+- Run the Genetic_Algo_implementation.py which shows how to run the simulation using a basic genetic algorithm.
+- More details about the functions, calls and references can be found in the base_envi.py script which is the main environment code running on pygame.
 
-MIT License with Attribution
+##MIT License with Attribution
 
 Copyright (c) [2024] [Mandred Tech]
 
