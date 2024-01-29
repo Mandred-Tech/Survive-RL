@@ -1,7 +1,13 @@
 <![Header](./Environment_View.png)>
-# Survive-RL
+<h1 align="center">SURVIVE-RL</h1>
+
 The reinforcement learning environment with advanced interaction between the agents.
-Video Explanation: https://youtu.be/jYEJakEAMzM?si=n_CALfYUGUDMKFSB
+
+Video Explanation:
+<p align="left">
+<a href="https://youtu.be/jYEJakEAMzM?si=n_CALfYUGUDMKFSB" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/youtube.svg" alt="Mandred Tech" height="30" width="40" /></a>
+</p>
+
 ### Interactions
 The following interactions take place:
 1. When agent tries to move into the block of the rock,the rock moves
