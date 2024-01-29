@@ -40,7 +40,7 @@ in Simulation function. Its default value is 1.
 - Run the Genetic_Algo_implementation.py which shows how to run the simulation using a basic genetic algorithm.
 - More details about the functions, calls and references can be found in the base_envi.py script which is the main environment code running on pygame.
 
-##MIT License with Attribution
+## MIT License with Attribution
 
 Copyright (c) [2024] [Mandred Tech]
 
